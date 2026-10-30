@@ -1,0 +1,7 @@
+services:
+  nginx:
+    cpus: 2
+    cpuset: ""
+    mem_limit: 268435456
+    memswap_limit: 268435456
+    mem_reservation: 268435456

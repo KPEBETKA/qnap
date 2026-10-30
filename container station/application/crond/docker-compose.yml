@@ -1,0 +1,9 @@
+services:
+  crond:
+    container_name: crond
+    image: alpine:latest
+    pull_policy: always
+    restart: unless-stopped
+    volumes:
+      - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/crond/crontabs:/etc/crontabs/root:ro
+    command: "crond -f -d 8"

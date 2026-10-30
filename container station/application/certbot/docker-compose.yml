@@ -1,0 +1,9 @@
+services:
+  certbot:
+    container_name: certbot
+    image: certbot/dns-cloudflare
+    pull_policy: always
+    restart: unless-stopped
+    volumes:
+      - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/certbot/conf:/etc/letsencrypt:rw
+    command: "certonly --non-interactive --dns-cloudflare --dns-cloudflare-credentials /etc/letsencrypt/cloudflare/token -d example.com -d *.example.com --agree-tos -m email@example.com"

@@ -1,0 +1,7 @@
+services:
+  vaultwarden:
+    cpus: 1
+    cpuset: ""
+    mem_limit: 134217728
+    memswap_limit: 134217728
+    mem_reservation: 134217728

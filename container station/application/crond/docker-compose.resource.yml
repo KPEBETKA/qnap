@@ -1,0 +1,7 @@
+services:
+  crond:
+    cpus: 1
+    cpuset: ""
+    mem_limit: 67108864
+    memswap_limit: 67108864
+    mem_reservation: 67108864

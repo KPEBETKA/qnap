@@ -1,0 +1,13 @@
+services:
+  mattermost:
+    cpus: 2
+    cpuset: ""
+    mem_limit: 2147483648
+    memswap_limit: 2147483648
+    mem_reservation: 134217728
+  postgres:
+    cpus: 2
+    cpuset: ""
+    mem_limit: 2147483648
+    memswap_limit: 2147483648
+    mem_reservation: 134217728
