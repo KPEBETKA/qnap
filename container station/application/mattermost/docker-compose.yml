@@ -3,6 +3,7 @@ services:
   postgres:
     container_name: postgres
     image: postgres:18-alpine
+    pull_policy: always
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
