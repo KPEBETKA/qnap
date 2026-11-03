@@ -6,7 +6,7 @@ services:
     pull_policy: always
     restart: unless-stopped
     networks:
-      - proxy-net
+      - vaultwarden-external
     environment:
       DOMAIN: https://vaultwarden.example.com
       WEBSOCKET_ENABLED: true
@@ -16,5 +16,5 @@ services:
     volumes:
       - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/vaultwarden:/data:rw
 networks:
-  proxy-net:
+  vaultwarden-external:
     external: true

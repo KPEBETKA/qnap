@@ -1,20 +1,5 @@
 version: '3'
 services:
-  postgres:
-    container_name: postgres
-    image: postgres:18-alpine
-    pull_policy: always
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    networks:
-      - proxy-net
-    environment:
-      POSTGRES_USER: postgres_qnap_user
-      POSTGRES_PASSWORD: postgres_qnap_user_password
-      POSTGRES_DB: mattermost
-    volumes:
-      - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/mattermost/postgresql:/var/lib/postgresql
   mattermost:
     container_name: mattermost
     image: mattermost/mattermost-enterprise-edition:latest
@@ -25,11 +10,12 @@ services:
     links:
       - postgres:postgres
     networks:
-      - proxy-net
+      - mattermost-external
+      - mattermost-internal
     environment:
       MM_SERVICESETTINGS_SITEURL: https://mattermost.example.com
       MM_SQLSETTINGS_DRIVERNAME: postgres
-      MM_SQLSETTINGS_DATASOURCE: postgres://postgres_qnap_user:postgres_qnap_user_password@postgres:5432/mattermost?sslmode=disable&connect_timeout=10
+      MM_SQLSETTINGS_DATASOURCE: postgres://user:password@postgres:5432/mattermost?sslmode=disable&connect_timeout=10
       MM_SERVICESETTINGS_ALLOWEDUNTRUSTEDINTERNALCONNECTIONS: ""
       PATH: /mattermost/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     volumes:
@@ -40,6 +26,23 @@ services:
       - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/mattermost/plugins:/mattermost/plugins
     depends_on:
       - postgres
+  postgres:
+    container_name: postgres
+    image: postgres:18-alpine
+    pull_policy: always
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - mattermost-internal
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mattermost
+    volumes:
+      - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/mattermost/postgresql:/var/lib/postgresql
 networks:
-  proxy-net:
+  mattermost-external:
     external: true
+  mattermost-internal:
+    driver: bridge

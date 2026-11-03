@@ -9,7 +9,9 @@ services:
       - 10080:80/tcp
       - 10443:443/tcp
     networks:
-      - proxy-net
+      - vaultwarden-external
+      - mattermost-external
+      - mtg-external
     volumes:
       - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/nginx/conf:/etc/nginx:ro
       - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/certbot/conf/live/example.com/privkey.pem:/etc/certbot/privkey.pem:ro
@@ -18,5 +20,9 @@ services:
       - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/nginx/html:/usr/share/nginx/html:rw
       - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/nginx/cache:/usr/share/nginx/cache:rw
 networks:
-  proxy-net:
+  vaultwarden-external:
+    external: true
+  mattermost-external:
+    external: true
+  mtg-external:
     external: true
