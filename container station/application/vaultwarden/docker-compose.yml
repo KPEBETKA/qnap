@@ -1,4 +1,3 @@
-version: '3'
 services:
   vaultwarden:
     container_name: vaultwarden
@@ -13,8 +12,43 @@ services:
       SIGNUPS_ALLOWED: false
       EMAIL_CHANGE_ALLOWED: false
       INVITATIONS_ALLOWED: false
+      TZ: Europe/Moscow
     volumes:
       - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/vaultwarden:/data:rw
+  ofelia:
+    container_name: ofelia-vw
+    image: ghcr.io/netresearch/ofelia:latest
+    pull_policy: always
+    restart: unless-stopped
+    depends_on:
+      - vaultwarden
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: Europe/Moscow
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.vw-db-dump.schedule: "0 7 0 * * *"
+      ofelia.job-exec.vw-db-dump.container: "vaultwarden"
+      ofelia.job-exec.vw-db-dump.user: "0"
+      ofelia.job-exec.vw-db-dump.no-overlap: "true"
+      ofelia.job-exec.vw-db-dump.command: >-
+        sh -c 'set -e;
+        max_retries=10; attempt=1;
+        while [ $$attempt -le $$max_retries ]; do
+          if /vaultwarden backup; then break; fi;
+          echo "Backup attempt $$attempt failed, retrying in 5s...";
+          attempt=$$((attempt+1)); sleep 5;
+        done;
+        FRESH=$$(find /data -maxdepth 2 -type f | grep -E "/db_[0-9]{8}_[0-9]{6}\.sqlite3$$" | sort | tail -n 1);
+        if [ -z "$$FRESH" ]; then echo "Error: dump file not found!"; exit 1; fi;
+        echo "Fresh dump found: $$FRESH";
+        find /data -maxdepth 2 -type f | grep -E "/db_[0-9]{8}_[0-9]{6}\.sqlite3$$" | while read -r f; do
+          if [ "$$f" != "$$FRESH" ]; then
+            echo "Removing old dump: $$f";
+            rm -f "$$f";
+          fi;
+        done'
 networks:
   vaultwarden-external:
     external: true
