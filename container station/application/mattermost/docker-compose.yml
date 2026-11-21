@@ -1,4 +1,3 @@
-version: '3'
 services:
   mattermost:
     container_name: mattermost
@@ -18,6 +17,7 @@ services:
       MM_SQLSETTINGS_DATASOURCE: postgres://user:password@postgres:5432/mattermost?sslmode=disable&connect_timeout=10
       MM_SERVICESETTINGS_ALLOWEDUNTRUSTEDINTERNALCONNECTIONS: ""
       PATH: /mattermost/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      TZ: Europe/Moscow
     volumes:
       - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/mattermost/client/plugins:/mattermost/client/plugins
       - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/mattermost/config:/mattermost/config
@@ -39,8 +39,32 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: mattermost
+      TZ: Europe/Moscow
     volumes:
       - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/mattermost/postgresql:/var/lib/postgresql
+      - /share/CACHEDEV1_DATA/Container/container-station-data/appdata/mattermost/pgdump:/pgdump
+  ofelia:
+    container_name: ofelia-mm
+    image: ghcr.io/netresearch/ofelia:latest
+    pull_policy: always
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Moscow
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.mm-db-dump.schedule: "0 5 0 * * *"
+      ofelia.job-exec.mm-db-dump.container: "postgres"
+      ofelia.job-exec.mm-db-dump.user: "postgres"
+      ofelia.job-exec.mm-db-dump.command: >-
+        sh -c 'set -e; TS=$$(date +%Y%m%d-%H%M%S);
+        rm -f /pgdump/*.tmp;
+        pg_dump -U user -d mattermost -Fc -f /pgdump/$$TS.tmp;
+        rm -f /pgdump/*.dump;
+        mv /pgdump/$$TS.tmp /pgdump/$$TS.dump;'
+    depends_on:
+      - postgres
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 networks:
   mattermost-external:
     external: true
