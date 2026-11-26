@@ -52,15 +52,18 @@ services:
       TZ: Europe/Moscow
     labels:
       ofelia.enabled: "true"
+      ofelia.job-exec.mm-db-dump.no-overlap: "true"
       ofelia.job-exec.mm-db-dump.schedule: "0 5 0 * * *"
       ofelia.job-exec.mm-db-dump.container: "postgres"
       ofelia.job-exec.mm-db-dump.user: "postgres"
       ofelia.job-exec.mm-db-dump.command: >-
         sh -c 'set -e; TS=$$(date +%Y%m%d-%H%M%S);
-        rm -f /pgdump/*.tmp;
-        pg_dump -U user -d mattermost -Fc -f /pgdump/$$TS.tmp;
-        rm -f /pgdump/*.dump;
-        mv /pgdump/$$TS.tmp /pgdump/$$TS.dump;'
+        pg_dump -U postgres_qnap_user -d mattermost -Fc -f /pgdump/$$TS.dump;
+        if [ ! -s "/pgdump/$$TS.dump" ]; then
+          echo "ERROR: /pgdump/$$TS.dump is missing or empty!" >&2;
+          exit 1;
+        fi;
+        find /pgdump -maxdepth 1 -name "*.dump" ! -name "$$TS.dump" -delete;'
     depends_on:
       - postgres
     volumes:
